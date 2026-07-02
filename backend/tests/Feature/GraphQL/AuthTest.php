@@ -158,19 +158,3 @@ class AuthTest extends TestCase
         ]);
     }
 }
-
-
-
-// para probar rutas protegidas dentro de un test se puede usar una funcion helper 
-// 1. Haces el login y guardas la respuesta
-// $response = $this->graphQL(' mutation { login(...) { token } } ');
-// 2. Extraes el token del JSON de respuesta
-// $token = $response->json('data.login.token');
-
-// 3. Le dices a tu test que las siguientes peticiones lleven la cabecera de Autorización
-//$this->withHeaders([
-//    'Authorization' => "Bearer $token",
-//]);
-
-// 4. Ahora puedes hacer consultas protegidas y pasarán el guard de Sanctum
-//$perfilResponse = $this->graphQL(' query { me { name } } ');
