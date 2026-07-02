@@ -1,0 +1,103 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+scalar Upload @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Queries
+# ─────────────────────────────────────────────────────────────────────────────
+"Indicates what fields are available at the top level of a query operation."
+type Query {
+    "Returns the currently authenticated user."
+    me: User @auth @guard(with: ["sanctum"])
+
+    "Returns the documents for the authenticated user."
+    documents: [Document!]! @paginate(defaultCount: 10) @guard(with: ["sanctum"]) @builder(method: "App\\GraphQL\\Queries\\Documents")
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mutations
+# ─────────────────────────────────────────────────────────────────────────────
+type Mutation {
+    "Register a new user and return an auth token."
+    register(input: RegisterInput! @spread): AuthPayload!
+        @field(resolver: "App\\GraphQL\\Mutations\\Register")
+
+    "Authenticate an existing user and return an auth token."
+    login(input: LoginInput! @spread): AuthPayload!
+        @field(resolver: "App\\GraphQL\\Mutations\\Login")
+
+    "Revoke the current access token."
+    logout: LogoutResponse!
+        @field(resolver: "App\\GraphQL\\Mutations\\Logout")
+        @guard(with: ["sanctum"])
+
+    "Upload a document."
+    uploadDocument(file: Upload!, title: String): Document!
+        @field(resolver: "App\\GraphQL\\Mutations\\UploadDocument")
+        @guard(with: ["sanctum"])
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Types
+# ─────────────────────────────────────────────────────────────────────────────
+"Account of a person who uses this application."
+type User {
+    "Unique primary key."
+    id: ID!
+
+    "The user's display name."
+    name: String!
+
+    "Unique email address."
+    email: String!
+
+    "When the account was created."
+    created_at: DateTime!
+
+    "When the account was last updated."
+    updated_at: DateTime!
+}
+
+"Returned after a successful register or login."
+type AuthPayload {
+    "Sanctum personal access token."
+    token: String!
+
+    "The authenticated user."
+    user: User!
+}
+
+"Returned after a successful logout."
+type LogoutResponse {
+    "Confirmation message."
+    message: String!
+}
+
+"An uploaded document."
+type Document {
+    id: ID!
+    user: User! @belongsTo
+    title: String
+    original_name: String!
+    file_path: String!
+    mime_type: String!
+    size: Int!
+    status: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inputs
+# ─────────────────────────────────────────────────────────────────────────────
+input RegisterInput {
+    name: String!
+    email: String! @rules(apply: ["email", "unique:users,email"])
+    password: String! @rules(apply: ["min:8", "confirmed"])
+    password_confirmation: String!
+}
+
+input LoginInput {
+    email: String! @rules(apply: ["email"])
+    password: String!
+}
