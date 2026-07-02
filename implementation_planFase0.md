@@ -18,7 +18,7 @@ Configurar la infraestructura base del proyecto: Docker Compose con Postgres+pgv
 
 #### [NEW] [docker-compose.yml](file:///c:/Users/BTWSunshide/Documents/Proyectos/DocuBrain/docker-compose.yml)
 Archivo Docker Compose en la raíz del proyecto con 3 servicios:
-- **`app`**: PHP 8.3 + Laravel (build desde `docker/app/Dockerfile`)
+- **`app`**: PHP 8.5 + Laravel (build desde `docker/app/Dockerfile`)
   - Volumen montando `./backend` a `/var/www/html`
   - Depende de `postgres` y `redis`
 - **`postgres`**: Imagen `pgvector/pgvector:pg17`
@@ -29,7 +29,7 @@ Archivo Docker Compose en la raíz del proyecto con 3 servicios:
   - Puerto `6379` expuesto
 
 #### [NEW] [docker/app/Dockerfile](file:///c:/Users/BTWSunshide/Documents/Proyectos/DocuBrain/docker/app/Dockerfile)
-Imagen PHP 8.3-FPM con:
+Imagen PHP 8.5-FPM con:
 - Extensiones: `pdo_pgsql`, `pgsql`, `redis`, `pcntl`, `bcmath`, `zip`
 - Composer instalado
 - Working directory: `/var/www/html`
