@@ -157,4 +157,55 @@ class AuthTest extends TestCase
             ],
         ]);
     }
+
+    public function test_user_can_logout(): void
+    {
+        $user = User::create([
+            'name' => 'Existing User',
+            'email' => 'existing@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->graphQL(
+            /** @lang GraphQL */
+            '
+            mutation {
+                login(input: {
+                    email: "existing@example.com"
+                    password: "password123"
+                }) {
+                    token
+                    user {
+                        name
+                        email
+                    }
+                }
+            }
+        '
+        );
+
+        $token = $response->json('data.login.token');
+        $this->withHeaders([
+            'Authorization' => "Bearer $token",
+        ]);
+
+        $response = $this->graphQL(
+            /** @lang GraphQL */
+            '
+            mutation {
+                logout {
+                    message
+                }
+            }
+        '
+        );
+        $response->assertJsonStructure([
+            'data' => [
+                'logout' => [
+                    'message',
+                ],
+            ],
+        ]);
+        $response->assertJsonPath('data.logout.message', 'Logged out successfully.');
+    }
 }

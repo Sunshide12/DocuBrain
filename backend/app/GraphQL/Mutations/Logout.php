@@ -15,13 +15,16 @@ final class Logout
      * @param  array<string, mixed>  $args
      * @return array{message: string}
      */
-    public function __invoke(null $_, array $args, array $context): array
+    public function __invoke(null $_, array $args, $context): array
     {
-        /** @var Request $request */
-        $request = $context['request'];
+        /** @var \Illuminate\Http\Request $request */
+        $request = $context->request();
 
         // Revoke the token that was used to authenticate this request
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+        }
 
         return [
             'message' => 'Logged out successfully.',
