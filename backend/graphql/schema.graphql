@@ -1,5 +1,6 @@
 "A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
 scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+scalar Upload @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Queries
@@ -8,6 +9,9 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 type Query {
     "Returns the currently authenticated user."
     me: User @auth @guard(with: ["sanctum"])
+
+    "Returns the documents for the authenticated user."
+    documents: [Document!]! @paginate(defaultCount: 10) @guard(with: ["sanctum"]) @builder(method: "App\\GraphQL\\Queries\\Documents")
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -25,6 +29,11 @@ type Mutation {
     "Revoke the current access token."
     logout: LogoutResponse!
         @field(resolver: "App\\GraphQL\\Mutations\\Logout")
+        @guard(with: ["sanctum"])
+
+    "Upload a document."
+    uploadDocument(file: Upload!, title: String): Document!
+        @field(resolver: "App\\GraphQL\\Mutations\\UploadDocument")
         @guard(with: ["sanctum"])
 }
 
@@ -62,6 +71,20 @@ type AuthPayload {
 type LogoutResponse {
     "Confirmation message."
     message: String!
+}
+
+"An uploaded document."
+type Document {
+    id: ID!
+    user: User! @belongsTo
+    title: String
+    original_name: String!
+    file_path: String!
+    mime_type: String!
+    size: Int!
+    status: String!
+    created_at: DateTime!
+    updated_at: DateTime!
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
